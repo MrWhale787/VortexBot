@@ -1,6 +1,6 @@
 #pip install requests
 
-import grequests as greq
+import requests as req
 import json
 
 api_key = ""
@@ -12,7 +12,7 @@ def fetchMatch(RID):
         int(RID)
         url = f"https://api.leaguecloud.org/sclbuild/getround?id={RID}&api_key={api_key}"
         try:
-            response = greq.get(url)
+            response = req.get(url)
             output = response.json()
             if output["error"] != False:
                 return output["message"]

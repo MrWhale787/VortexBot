@@ -12,7 +12,7 @@ async def on_ready():
     print('Bot is ready')
 
 @client.command(aliases=['match','m'])
-async def viewE(ctx,roundID):
+async def view(ctx,roundID):
     data = LC.fetchMatch(roundID)
     if len(data) != 2:
         await ctx.send(data)
