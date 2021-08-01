@@ -21,9 +21,9 @@ async def view(ctx,roundID):
     playerStats = matchData["stats"]
     matchDetails = f'Map: {matchData["map"]}, Mode: {matchData["mode"]}, Victor: {matchData["victor"]}'
     phantoms = playerStats["Phantoms"]
-    phantomsFormatted = pF.formatTeam(phantoms)
+    phantomsFormatted = await pF.formatTeam(phantoms)
     ghosts = playerStats["Ghosts"]
-    ghostsFormatted = pF.formatTeam(ghosts)
+    ghostsFormatted = await pF.formatTeam(ghosts)
     embed=discord.Embed(title=RID)
     embed.add_field(name="Match Details", value=matchDetails , inline=False)
     embed.add_field(name="Phantoms", value=phantomsFormatted, inline=False)
