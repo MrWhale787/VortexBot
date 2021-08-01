@@ -33,4 +33,5 @@ async def view(ctx,roundID):
 
 
 
-client.run('ODcxMjc3NjExMjYxNzg4MTcw.YQY-gg.k_PNrzt5NvIkraKNU5pfuHavMj4')
+#client.run('ODcxMjc3NjExMjYxNzg4MTcw.YQY-gg.k_PNrzt5NvIkraKNU5pfuHavMj4')
+client.run('ODcxNDAwMTczMjIwMjkwNjAw.YQawpw.0FMoo21-uxmwj-amoFMlDGseWgU')
