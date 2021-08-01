@@ -14,6 +14,8 @@ async def on_ready():
 @client.command(aliases=['match','m'])
 async def viewE(ctx,roundID):
     data = LC.fetchMatch(roundID)
+    if len(data) != 2:
+        await ctx.send(data)
     RID = data[0]
     matchData = data[1]
     playerStats = matchData["stats"]
@@ -22,11 +24,10 @@ async def viewE(ctx,roundID):
     phantomsFormatted = pF.formatTeam(phantoms)
     ghosts = playerStats["Ghosts"]
     ghostsFormatted = pF.formatTeam(ghosts)
-
     embed=discord.Embed(title=RID)
     embed.add_field(name="Match Details", value=matchDetails , inline=False)
-    embed.add_field(name="Phantoms", value=phantomsFormatted, inline=True)
-    embed.add_field(name="Ghosts", value=ghostsFormatted, inline=True)
+    embed.add_field(name="Phantoms", value=phantomsFormatted, inline=False)
+    embed.add_field(name="Ghosts", value=ghostsFormatted, inline=False)
     await ctx.send(embed=embed)
 
 
