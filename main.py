@@ -2,10 +2,15 @@
 import discord
 import LeagueCloud as LC
 import playerFormatter as pF
+import json
 from discord.ext import commands
 
 client = commands.Bot(command_prefix = "vt!")
-LC.api_key = '2ux1zyiE5vxjkEHjcn4ZeFYlfTEufGnRG1nQTbbg'
+with open("api-keys.txt","r") as file:
+     keys = json.load(file)
+     discAPI = keys["discAPI"]
+     LC.api_key = keys["LC-API"]
+
 
 @client.event
 async def on_ready():
@@ -13,7 +18,7 @@ async def on_ready():
 
 @client.command(aliases=['match','m'])
 async def view(ctx,roundID):
-    data = LC.fetchMatch(roundID)
+    data = await LC.fetchMatch(roundID)
     if len(data) != 2:
         await ctx.send(data)
     RID = data[0]
@@ -33,5 +38,4 @@ async def view(ctx,roundID):
 
 
 
-#client.run('ODcxMjc3NjExMjYxNzg4MTcw.YQY-gg.k_PNrzt5NvIkraKNU5pfuHavMj4')
-client.run('ODcxNDAwMTczMjIwMjkwNjAw.YQawpw.0FMoo21-uxmwj-amoFMlDGseWgU')
+client.run(discAPI)
