@@ -2,6 +2,7 @@
 import discord
 import LeagueCloud as LC
 import playerFormatter as pF
+import Uploader
 import json
 from discord.ext import commands
 
@@ -14,6 +15,7 @@ with open("api-keys.txt","r") as file:
 
 @client.event
 async def on_ready():
+    await Uploader.configure()
     print('Bot is ready')
 
 @client.command(aliases=['match','m'])
@@ -34,6 +36,13 @@ async def view(ctx,roundID):
     embed.add_field(name="Phantoms", value=phantomsFormatted, inline=False)
     embed.add_field(name="Ghosts", value=ghostsFormatted, inline=False)
     await ctx.send(embed=embed)
+
+role = "recruiter"
+@client.command()
+@commands.has_role(role)
+async def upload(ctx,roundID):
+    await Uploader.upload(roundID)
+    await ctx.send("uploaded",roundID)
 
 
 
