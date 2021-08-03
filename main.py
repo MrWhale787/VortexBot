@@ -3,6 +3,7 @@ import discord
 import LeagueCloud as LC
 import playerFormatter as pF
 import Uploader
+import robloxAPI as rbx
 import json
 from discord.ext import commands
 
@@ -44,7 +45,15 @@ async def upload(ctx,roundID):
     await Uploader.upload(roundID)
     await ctx.send("uploaded",roundID)
 
+@client.command()
+async def register(ctx,RobloxID):
+    discordID = ctx.message.author.id
+    robloxData = await rbx.getUserInfo(RobloxID)
+    verificationString = await Uploader.addPlayer(robloxData,discordID)
+    await ctx.send(f'Player Added, to verify please add the following string to your Roblox Profile Description and run vt!verify. verificationString: {verificationString}')
 
+@client.command()
+async def verify(ctx):
 
 
 client.run(discAPI)

@@ -18,8 +18,6 @@ async def getUserInfo(UID):
             return output
 
 
-
-
 async def getUsersInfo(UIDs):
     output = []
     async with aiohttp.ClientSession() as session:
