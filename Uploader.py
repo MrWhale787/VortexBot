@@ -1,5 +1,6 @@
 #Basic Data Uploader (links with sqlite3, will rewrite once i have made full database)
 import LeagueCloud as LC
+import robloxAPI as rbx
 import random
 import string
 from databases import Database
@@ -14,9 +15,7 @@ async def configure():
                 CREATE TABLE players(
                 RobloxID PRIMARY KEY,
                 DiscordID INTEGER,
-                DisplayName TEXT,
-                VerificationString TEXT,
-                Verified INTEGER
+                DisplayName TEXT
                 )
                 """
         createMatches = """
@@ -36,6 +35,7 @@ async def configure():
                 Deaths INTEGER NOT NULL,
                 Score INTEGER NOT NULL,
                 Team TEXT NOT NULL,
+                MMR FLOAT NOT NULL,
                 FOREIGN KEY (RID) REFERENCES matches (RID),
                 FOREIGN KEY (RobloxID) REFERENCES players (RobloxID)
                 )
@@ -46,8 +46,21 @@ async def configure():
     except:
         print("database already exists continuing")
 
-async def upload(RID):
+async def addPlayer(robloxID):
+    robloxData = await rbx.getUserInfo(robloxID)
+    DiscordID = await LC.fetchUser(robloxID)
+    DiscordID = DiscordID["discord_id"]
+    Player = {"RobloxID":robloxID,"DiscordID":DiscordID,"DisplayName":robloxData["name"]}
+    try:
+        query = """
+                INSERT INTO Players(RobloxID,DiscordID,DisplayName) VALUES (:RobloxID, :DiscordID, :DisplayName)
+                """
+        await database.execute(query=query, values=Player)
+        return "You are now registered"
+    except:
+        return "You are already registered"
 
+async def upload(RID):
     matchData = await LC.fetchMatch(RID)
     data = matchData[1]
     stats = data["stats"]
@@ -61,22 +74,20 @@ async def upload(RID):
             playerData = teamData[str(player)]
             playerMatch = {"RID":int(matchData[0]),"RobloxID":int(players[i]),"Kills": int(playerData["kills"]),"Deaths": playerData["deaths"],"Score": playerData["score"],"Team":team}
             playersList.append(playerMatch.copy())
-    print(playersList)
-    query = """
-            INSERT INTO RoundData(RID,RobloxID,Kills,Deaths,Score,Team) VALUES (:RID, :RobloxID, :Kills, :Deaths, :Score, :Team)
+    playerMatch = """
+            INSERT INTO playerMatch(RID,RobloxID,Kills,Deaths,Score,Team) VALUES (:RID, :RobloxID, :Kills, :Deaths, :Score, :Team)
             """
-    await database.execute_many(query=query, values=playersList)
-
-async def addPlayer(robloxData, DiscordID):
-    verificationString = ''.join(random.sample(string.ascii_letters + string.digits, 16))
-    Player = {"RobloxID":robloxData["id"],"DiscordID":DiscordID,"DisplayName":robloxData["name"],"VerificationString":verificationString,"Verified":0}
-    query = """
-            INSERT INTO Players(RobloxID,DiscordID,DisplayName,VerificationString,Verified) VALUES (:RobloxID, :DiscordID, :DisplayName, :VerificationString, :Verified)
+    match = f"""
+            INSERT INTO matches(RID,Map,Mode,Victor) VALUES (:RID,:Map,:Mode,:Victor)
             """
-    await database.execute(query=query, values=Player)
-    return verificationString
+    matchValues = {"RID":RID,"Map":data["map"],"Mode":data["mode"],"Victor":data["victor"]}
 
-async def queryPlayer(DiscordID):
-    query = f'SELECT FROM players(RobloxID,DiscordID,VerificationString) WHERE DiscordID = {DiscordID}'
-    output = await database.execute(query=query)
-    return output
+    for i in players:
+        await addPlayer(i)
+
+    try:
+        await database.execute(query=match,values=matchValues)
+        await database.execute_many(query=playerMatch, values=playersList)
+        return f'{RID} uploaded'
+    except:
+        return f'{RID} already uploaded'

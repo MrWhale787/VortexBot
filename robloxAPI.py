@@ -3,6 +3,7 @@ import asyncio
 import aiohttp
 import json
 
+timeout = aiohttp.ClientTimeout(total=30)
 
 async def getUserInfo(UID):
     async with aiohttp.ClientSession() as session:
