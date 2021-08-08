@@ -1,0 +1,47 @@
+stats are given
+
+Kills
+Deaths
+win
+Score
+
+stats we can get
+
+obj (estimate)
+true kills
+
+
+things we dont want:
+  kd based
+  win loss based
+
+
+allScores = [linkedList]
+
+if you win but int, you should not gain as much as carry            mmr
+if you win but int.                                                 mmr * (0.5*someratio)
+if you lose but int you lose a shit ton.                            mmr * -someratio
+if you lose but do well you gain as much as lose but int.           mmr * -(0.5*someratio)
+
+
+
+raw mmr =
+     objScore = (score-kills*100)
+     trueKills = inverseTeam[deaths]
+     contribution = objScore/teamObjScore
+     expectedContribution = 1/teamPlayers
+     contributionRatio = contribution/expectedContribution
+     KD = kills/Deaths
+     if contributionRatio > 1:
+          scoreMMR = 8 + (5*((contributionRatio - 1 )*4)
+     else:
+      scoreMMR = 8*contributionRatio
+
+
+      if (KD * 2.5) > 7:
+          kdMMR = 7 + (KD)
+      else:
+        kdMMR = KD*2.5
+
+
+      rawMMR = kdMMR + scoreMMR
