@@ -6,6 +6,7 @@ import string
 from databases import Database
 database = Database('sqlite:///VortexData.db')
 
+#lol
 #database configurator - only runs on initial setup
 async def configure():
     await database.connect()
