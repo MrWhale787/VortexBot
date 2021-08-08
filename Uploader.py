@@ -6,6 +6,7 @@ import string
 from databases import Database
 database = Database('sqlite:///VortexData.db')
 
+#database configurator - only runs on initial setup
 async def configure():
     await database.connect()
     query = "PRAGMA foreign_keys = ON"
@@ -46,6 +47,7 @@ async def configure():
     except:
         print("database already exists continuing")
 
+#add player to database
 async def addPlayer(robloxID):
     robloxData = await rbx.getUserInfo(robloxID)
     DiscordID = await LC.fetchUser(robloxID)
@@ -60,6 +62,7 @@ async def addPlayer(robloxID):
     except:
         return "You are already registered"
 
+#upload rounds to database
 async def upload(RID):
     matchData = await LC.fetchMatch(RID)
     data = matchData[1]
@@ -71,11 +74,12 @@ async def upload(RID):
         teamData = stats[team]
         players = list(teamData.keys())
         for player in players:
+            mmr = 0
             playerData = teamData[str(player)]
-            playerMatch = {"RID":int(matchData[0]),"RobloxID":int(players[i]),"Kills": int(playerData["kills"]),"Deaths": playerData["deaths"],"Score": playerData["score"],"Team":team}
+            playerMatch = {"RID":int(matchData[0]),"RobloxID":int(players[i]),"Kills": int(playerData["kills"]),"Deaths": playerData["deaths"],"Score": playerData["score"],"Team":team, "MMR":mmr}
             playersList.append(playerMatch.copy())
     playerMatch = """
-            INSERT INTO playerMatch(RID,RobloxID,Kills,Deaths,Score,Team) VALUES (:RID, :RobloxID, :Kills, :Deaths, :Score, :Team)
+            INSERT INTO playerMatch(RID,RobloxID,Kills,Deaths,Score,Team,MMR) VALUES (:RID, :RobloxID, :Kills, :Deaths, :Score, :Team, :MMR)
             """
     match = f"""
             INSERT INTO matches(RID,Map,Mode,Victor) VALUES (:RID,:Map,:Mode,:Victor)
