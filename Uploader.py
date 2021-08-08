@@ -1,6 +1,7 @@
 #Basic Data Uploader (links with sqlite3, will rewrite once i have made full database)
 import LeagueCloud as LC
 import robloxAPI as rbx
+import MMR
 import random
 import string
 from databases import Database
@@ -76,7 +77,7 @@ async def upload(RID):
         for player in players:
             teamObjScore += (player["score"]-player["kills"]*100)
         for player in players:
-            mmr = MMRcalc(playerData, teamObjScore, len(players)) #rawMMR
+            mmr = MMR.MMRcalc(playerData, teamObjScore, len(players)) #rawMMR
             playerData = teamData[str(player)]
             playerMatch = {"RID":int(matchData[0]),"RobloxID":int(players[i]),"Kills": int(playerData["kills"]),"Deaths": playerData["deaths"],"Score": playerData["score"],"Team":team, "MMR":mmr}
             playersList.append(playerMatch.copy())
