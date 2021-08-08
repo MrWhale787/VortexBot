@@ -74,7 +74,9 @@ async def upload(RID):
         teamData = stats[team]
         players = list(teamData.keys())
         for player in players:
-            mmr = 0
+            teamObjScore += (player["score"]-player["kills"]*100)
+        for player in players:
+            mmr = MMRcalc(playerData, teamObjScore, len(players)) #rawMMR
             playerData = teamData[str(player)]
             playerMatch = {"RID":int(matchData[0]),"RobloxID":int(players[i]),"Kills": int(playerData["kills"]),"Deaths": playerData["deaths"],"Score": playerData["score"],"Team":team, "MMR":mmr}
             playersList.append(playerMatch.copy())
