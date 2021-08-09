@@ -11,7 +11,8 @@ async def getUserInfo(UID):
         response = await session.get(url)
         output = await response.json()
         if len(output) != 7:
-            error = output[0]
+            print(output)
+            error = output['errors']
             error = error[0]
             error = error["message"]
             return error

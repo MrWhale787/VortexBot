@@ -66,6 +66,8 @@ async def addPlayer(robloxID):
 #upload rounds to database
 async def upload(RID):
     matchData = await LC.fetchMatch(RID)
+    if len(matchData) != 2:
+        return matchData
     data = matchData[1]
     stats = data["stats"]
     playersList = []
@@ -77,7 +79,6 @@ async def upload(RID):
         teamObjScore = 0
         team = nameTeams[i]
         teamData = stats[team]
-        print(teamData)
         for player in teamData:
             player = teamData[player]
             teamObjScore += (player["score"] - player["kills"]*100)
@@ -104,11 +105,12 @@ async def upload(RID):
             player = teamData[player]
             teamObjScore += (player["score"]-player["kills"]*100)
         for player in players:
+            await addPlayer(player)
             playerData = teamData[str(player)]
             if playerData["score"] == 0:
                 continue
             mmr = await MMR.MMRcalc(playerData, teamObjScore, len(players),team,data["victor"],teamRatio) #rawMMR
-            playerMatch = {"RID":int(matchData[0]),"RobloxID":int(players[i]),"Kills": int(playerData["kills"]),"Deaths": playerData["deaths"],"Score": playerData["score"],"Team":team, "MMR":mmr}
+            playerMatch = {"RID":int(matchData[0]),"RobloxID":int(player),"Kills": int(playerData["kills"]),"Deaths": playerData["deaths"],"Score": playerData["score"],"Team":team, "MMR":mmr}
             playersList.append(playerMatch.copy())
     playerMatch = """
             INSERT INTO playerMatch(RID,RobloxID,Kills,Deaths,Score,Team,MMR) VALUES (:RID, :RobloxID, :Kills, :Deaths, :Score, :Team, :MMR)
@@ -118,11 +120,30 @@ async def upload(RID):
             """
     matchValues = {"RID":RID,"Map":data["map"],"Mode":data["mode"],"Victor":data["victor"]}
 
-    for i in players:
-        await addPlayer(i)
     try:
         await database.execute(query=match,values=matchValues)
         await database.execute_many(query=playerMatch, values=playersList)
         return f'{RID} uploaded'
     except:
         return f'{RID} already uploaded'
+
+async def queryPlayerMatches(discordID):
+    query = f"SELECT Kills, Deaths, Score, Team, matches.Map As Map, matches.Mode as Mode FROM playerMatch INNER JOIN players ON players.RobloxID = playerMatch.RobloxID INNER JOIN matches ON matches.RID = playerMatch.RID WHERE players.DiscordID = {discordID}"
+    output = await database.fetch_all(query=query)
+    return output
+
+async def queryPlayerName(discordID):
+    query = f"SELECT displayName FROM players WHERE players.DiscordID = {discordID}"
+    output = await database.fetch_all(query=query)
+    return output
+
+async def queryPlayerStats(discordID):
+    query = f'SELECT  SUM(Kills) AS Total_Kills, SUM(Deaths) AS Total_Deaths, AVG(Kills) / AVG(Deaths) AS KD FROM playerMatch INNER JOIN players ON players.RobloxID = playerMatch.RobloxID WHERE players.DiscordID = {discordID}'
+    output = await database.fetch_all(query=query)
+    return output
+
+
+async def queryMatch(RID):
+    query = f'SELECT RID, players.DisplayName, Kills, Deaths, Score, Team FROM playerMatch INNER JOIN players ON players.RobloxID = playerMatch.RobloxID WHERE RID = {RID}'
+    output = await database.execute(query=query)
+    return output

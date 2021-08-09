@@ -45,4 +45,23 @@ async def upload(ctx,roundID):
     outcome = await Uploader.upload(roundID)
     await ctx.send(outcome)
 
+@client.command(aliases=['whoIs'])
+async def queryPlayer(ctx,member : discord.Member):
+    print(member.id)
+    output = await Uploader.queryPlayerMatches(member.id)
+    userName = await Uploader.queryPlayerName(member.id)
+    if len(userName) == 0:
+        await(ctx.send("Error player not found"))
+        return
+    userName = userName[0]
+    stats = await Uploader.queryPlayerStats(member.id)
+    stats = stats[0]
+    totalKills = stats[0]
+    totalDeaths = stats[1]
+    KD = stats[2]
+    matches = "1`23"
+    embed=discord.Embed(title=userName[0],description=f'**Statistics**\nKills: {totalKills} \nDeaths: {totalDeaths} \nKD: {round(KD,2)}')
+    embed.add_field(name="Recent Matches", value=matches, inline=False)
+    await ctx.send(embed=embed)
+    
 client.run(discAPI)

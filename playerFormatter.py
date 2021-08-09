@@ -26,3 +26,7 @@ async def formatTeam(team):
         return fTeam
     except:
         return "Empty"
+
+async def formatPlayer(player):
+    pass
+    
