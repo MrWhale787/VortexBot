@@ -1,4 +1,4 @@
-async def MMRcalc(playerData, teamObjScore, teamPlayers):
+async def MMRcalc(playerData,teamObjScore,teamPlayers,team,teamWin,teamRatio):
 
 
     # calculation shit to get contribution ratio, too lazy to oneline it
@@ -10,7 +10,7 @@ async def MMRcalc(playerData, teamObjScore, teamPlayers):
     KD = playerData["kills"]/playerData["deaths"]
 
     if contributionRatio > 1:
-        scoreMMR = 8 + (5*(contributionRatio - 1 )*4)) # carry bonus
+        scoreMMR = 8 + (5*(contributionRatio - 1 )*4) # carry bonus
     else:
         scoreMMR = 8*contributionRatio
 
@@ -23,4 +23,20 @@ async def MMRcalc(playerData, teamObjScore, teamPlayers):
     # hard carry raw MMR (2.8kd, 1.2 contrib. ratio) = 21.8 rawMMR
 
     rawMMR = kdMMR + scoreMMR
-    return rawMMR
+
+	#mmr scaled
+    if contributionRatio > 0.7:
+        if team == teamWin:
+            scaledMMR = rawMMR
+        else:
+            scaledMMR = rawMMR * (-1*0.5*teamRatio)
+    else:
+        if team == teamWin:
+            scaledMMR = rawMMR * (0.5*teamRatio)
+        else:
+            scaledMMR = rawMMR * (-1*teamRatio) 		
+	
+		
+    return scaledMMR
+
+

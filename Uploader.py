@@ -69,16 +69,45 @@ async def upload(RID):
     data = matchData[1]
     stats = data["stats"]
     playersList = []
+    teamScores = []
     nameTeams = list(stats.keys())
+	
+	#calculate teamRatios
     for i in range(len(stats)):
+        teamObjScore = 0
+        team = nameTeams[i]
+        teamData = stats[team]
+        print(teamData)
+        for player in teamData:
+            player = teamData[player]
+            teamObjScore += (player["score"] - player["kills"]*100)
+        teamScores.append(teamObjScore)
+	
+
+    if data["victor"] == "Phantoms":
+        teamRatio = teamScores[0]/teamScores[1]
+    elif data["victor"] == "Ghosts":
+        teamRatio = teamScores[1]/teamScores[0]
+    else:
+        teamRatio = 1
+		
+
+
+
+	#arrange in record form and execute sql query
+    for i in range(len(stats)):
+        teamObjScore = 0
         team = nameTeams[i]
         teamData = stats[team]
         players = list(teamData.keys())
-        for player in players:
+        for player in teamData:
+            player = teamData[player]
             teamObjScore += (player["score"]-player["kills"]*100)
         for player in players:
-            mmr = MMR.MMRcalc(playerData, teamObjScore, len(players)) #rawMMR
             playerData = teamData[str(player)]
+            if playerData["score"] == 0:
+                continue
+            mmr = await MMR.MMRcalc(playerData, teamObjScore, len(players),team,data["victor"],teamRatio) #rawMMR
             playerMatch = {"RID":int(matchData[0]),"RobloxID":int(players[i]),"Kills": int(playerData["kills"]),"Deaths": playerData["deaths"],"Score": playerData["score"],"Team":team, "MMR":mmr}
             playersList.append(playerMatch.copy())
     playerMatch = """
@@ -91,7 +120,6 @@ async def upload(RID):
 
     for i in players:
         await addPlayer(i)
-
     try:
         await database.execute(query=match,values=matchValues)
         await database.execute_many(query=playerMatch, values=playersList)
