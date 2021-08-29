@@ -73,7 +73,7 @@ async def upload(RID):
     playersList = []
     teamScores = []
     nameTeams = list(stats.keys())
-	
+
 	#calculate teamRatios
     for i in range(len(stats)):
         teamObjScore = 0
@@ -83,7 +83,7 @@ async def upload(RID):
             player = teamData[player]
             teamObjScore += (player["score"] - player["kills"]*100)
         teamScores.append(teamObjScore)
-	
+
 
     if data["victor"] == "Phantoms":
         teamRatio = teamScores[0]/teamScores[1]
@@ -91,7 +91,7 @@ async def upload(RID):
         teamRatio = teamScores[1]/teamScores[0]
     else:
         teamRatio = 1
-		
+
 
 
 
@@ -101,11 +101,36 @@ async def upload(RID):
         team = nameTeams[i]
         teamData = stats[team]
         players = list(teamData.keys())
+
+        playerQuery = """
+                    SELECT RobloxID FROM players
+                    """
+        registeredPlayers = await database.fetch_all(query = playerQuery)
+        registeredPlayerID = []
+        for row in registeredPlayers:
+            print(row[0])
+            registeredPlayerID.append(row[0])
+        for player in players:
+            print(player)
+            if player in registeredPlayerID:
+                print("playerRegistered")
+                continue
+            else:
+                await addPlayer(player)
+
+
+
         for player in teamData:
             player = teamData[player]
             teamObjScore += (player["score"]-player["kills"]*100)
+
+
+
+
         for player in players:
-            await addPlayer(player)
+
+
+
             playerData = teamData[str(player)]
             if playerData["score"] == 0:
                 continue
@@ -128,7 +153,7 @@ async def upload(RID):
         return f'{RID} already uploaded'
 
 async def queryPlayerMatches(discordID):
-    query = f"SELECT Kills, Deaths, Score, Team, matches.Map As Map, matches.Mode as Mode FROM playerMatch INNER JOIN players ON players.RobloxID = playerMatch.RobloxID INNER JOIN matches ON matches.RID = playerMatch.RID WHERE players.DiscordID = {discordID}"
+    query = f"SELECT Kills, Deaths, Score, Team, matches.Map As Map, matches.Mode as Mode, matches.Victor as Victor FROM playerMatch INNER JOIN players ON players.RobloxID = playerMatch.RobloxID INNER JOIN matches ON matches.RID = playerMatch.RID WHERE players.DiscordID = {discordID}"
     output = await database.fetch_all(query=query)
     return output
 
@@ -145,5 +170,5 @@ async def queryPlayerStats(discordID):
 
 async def queryMatch(RID):
     query = f'SELECT RID, players.DisplayName, Kills, Deaths, Score, Team FROM playerMatch INNER JOIN players ON players.RobloxID = playerMatch.RobloxID WHERE RID = {RID}'
-    output = await database.execute(query=query)
+    output = await database.fetch_all(query=query)
     return output
