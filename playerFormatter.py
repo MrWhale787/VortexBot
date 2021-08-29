@@ -27,6 +27,9 @@ async def formatTeam(team):
     except:
         return "Empty"
 
-async def formatPlayer(player):
-    pass
-    
+async def formatMatches(matches):
+    fmatches = ""
+    for match in matches:
+        fmatch = f'Map: {match[4]}, Mode: {match[5]}, Team: {match[3]},  Victor: {match[6]}\nKills: {match[0]}, Deaths: {match[1]}, KD: {round((match[0]/match[1]),2)}, Score: {match[2]}\n'
+        fmatches = fmatches + f'\n{fmatch}'
+    return fmatches
